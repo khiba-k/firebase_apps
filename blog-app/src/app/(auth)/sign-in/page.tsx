@@ -1,11 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useSignInWithEmailAndPassword } from "react-firebase-hooks/auth";
+import {
+  useSignInWithEmailAndPassword,
+  useAuthState,
+} from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
+import GitHubButton from "@/screens/auth/GitHubButton";
+import GoogleButton from "@/screens/auth/GoogleButton";
 
 // SignIn Page
 const SignIn: React.FC = () => {
@@ -13,6 +18,22 @@ const SignIn: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const router = useRouter();
+  const [isLoad, setIsLoad] = useState<boolean>(false);
+  const [authorisedUser, authorisedLoading, authorisedError] =
+    useAuthState(auth);
+
+  // Check if user is logged in
+  useEffect(() => {
+    if (authorisedLoading) {
+      setIsLoad(true);
+    }
+    if (!authorisedLoading) {
+      setIsLoad(false);
+      if (authorisedUser) {
+        router.push("/");
+      }
+    }
+  }, [authorisedUser, router]);
 
   // Sign In with email and password
   const [signInWithEmailAndPassword, user, loading, signInError] =
@@ -29,7 +50,7 @@ const SignIn: React.FC = () => {
       if (result) {
         setEmail("");
         setPassword("");
-        router.push('/');
+        router.push("/");
       }
     } catch (e: any) {
       setError(e.message);
@@ -40,9 +61,12 @@ const SignIn: React.FC = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
-        <h2 className="text-center text-2xl font-bold text-gray-900">
-          Sign In
-        </h2>
+        <GitHubButton />
+        <GoogleButton />
+        <div className="w-full flex justify-center">or</div>
+        <h6 className="text-center text-2xl font-bold text-gray-900">
+          Sign In With Email
+        </h6>
 
         {error && (
           <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">
@@ -55,7 +79,7 @@ const SignIn: React.FC = () => {
             Creating account...
           </div>
         )}
-        
+
         {/* Sign In Form */}
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
@@ -92,7 +116,7 @@ const SignIn: React.FC = () => {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            className="w-full bg-[#FF3D00] text-white hover:bg-[#FF5722] focus:outline-none"
             disabled={loading}
           >
             {loading ? "Signing In..." : "Sign In"}

@@ -30,17 +30,13 @@ export default function Home() {
 
   return (
     <>
-      {isLoad ? (
-        <div>Loading...</div>
-      ) : (
-        <Button
-          onClick={() => {
-            signOut(auth);
-          }}
-        >
-          Sign Out
-        </Button>
-      )}
+      <Button
+        onClick={() => {
+          signOut(auth);
+        }}
+      >
+        Sign Out
+      </Button>
     </>
   );
 }
