@@ -5,22 +5,35 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateUserWithEmailAndPassword } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebaseConfig";
+import { useRouter } from "next/navigation";
+
+// Sign Up Page
 const SignUp: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const router = useRouter();
 
-  const [createUserWithEmailAndPassword] =
+  // Sign Up with email and password
+  const [createUserWithEmailAndPassword, user, loading, signUpError] =
     useCreateUserWithEmailAndPassword(auth);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  //Form submit function 
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     try {
-      const res = await createUserWithEmailAndPassword(email, password);
-      console.log("result", (res));
-      setEmail("");
-      setPassword("");
-    } catch (e) {
-      console.log(e);
+      const result = await createUserWithEmailAndPassword(email, password);
+
+      if (result) {
+        setEmail("");
+        setPassword("");
+        router.push('/');
+      }
+    } catch (e: any) {
+      setError(e.message);
+      console.error("Error creating user:", e.message);
     }
   };
 
@@ -30,8 +43,20 @@ const SignUp: React.FC = () => {
         <h2 className="text-center text-2xl font-bold text-gray-900">
           Sign Up
         </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Email Field */}
+
+        {error && (
+          <div className="rounded-md bg-red-50 p-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="text-center text-sm text-gray-600">
+            Creating account...
+          </div>
+        )}
+        {/* Sign Uo Form */}
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email" className="text-sm font-medium">
               Email
@@ -44,10 +69,10 @@ const SignUp: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1"
               required
+              disabled={loading}
             />
           </div>
 
-          {/* Password Field */}
           <div>
             <Label htmlFor="password" className="text-sm font-medium">
               Password
@@ -60,15 +85,16 @@ const SignUp: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1"
               required
+              disabled={loading}
             />
           </div>
 
-          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full bg-blue-600 text-white hover:bg-blue-700"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? "Creating Account..." : "Sign Up"}
           </Button>
         </form>
       </div>
