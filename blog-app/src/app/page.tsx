@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebaseConfig";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { Button } from "@/components/ui/button";
+import Loading from "./loading";
 
 // Home Page
 export default function Home() {
@@ -30,13 +31,17 @@ export default function Home() {
 
   return (
     <>
-      <Button
-        onClick={() => {
-          signOut(auth);
-        }}
-      >
-        Sign Out
-      </Button>
+      {isLoad ? (
+        <Loading />
+      ) : (
+        <Button
+          onClick={() => {
+            signOut(auth);
+          }}
+        >
+          Sign Out
+        </Button>
+      )}
     </>
   );
 }
