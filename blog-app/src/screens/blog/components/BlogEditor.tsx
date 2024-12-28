@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Editor } from "primereact/editor";
 import { Button } from "primereact/button";
-import handleBlogPost from "@/screens/blog/utils/BlogEditor";
+import {
+  handleBlogPost,
+} from "@/screens/blog/utils/Blog";
 import { auth } from "@/lib/firebaseConfig";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Toast } from "primereact/toast";
@@ -14,23 +16,9 @@ const BlogEditor = () => {
   const [title, setTitle] = useState("");
   const [user, userLoading, userError] = useAuthState(auth);
   const [isPosting, setIsPosting] = useState<boolean>(false);
-
-  // Properly typing the toast ref to avoid 'null' warning
-  const toast = useRef<Toast | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handlePostClick = async () => {
-    if (!title || !text) {
-      if (toast.current) {
-        toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Please fill out both the title and content before posting.",
-          life: 3000,
-        });
-      }
-      return;
-    }
-
     if (user) {
       setIsPosting(true);
       const postBlog = await handleBlogPost(title, text, user.uid);
@@ -49,22 +37,9 @@ const BlogEditor = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
+        // minHeight: "100vh",
       }}
     >
-      {/* Toast component to display notifications */}
-      <Toast
-        ref={toast}
-        style={{
-          position: "fixed",
-          top: "20px",
-          right: "20px",
-          borderRadius: "8px",
-          fontFamily: "'Arial', sans-serif",
-          backgroundColor: "blue",
-        }}
-      />
-
       <div
         style={{
           display: "flex",
